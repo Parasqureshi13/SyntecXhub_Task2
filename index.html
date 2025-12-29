@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated FAQ | Web Development</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-dark: #540863;
+            --primary: #92487A;
+            --secondary: #E49BA6;
+            --light: #FFD3D5;
+            --text-dark: #2d0036;
+            --text-light: #f9f0f1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 20px;
+            cursor: none;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--light);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.2s, background 0.3s, width 0.3s, height 0.3s;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-follower {
+            width: 8px;
+            height: 8px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: all 0.6s ease;
+            mix-blend-mode: difference;
+        }
+
+        .cursor.hover {
+            transform: scale(1.5);
+            background-color: var(--secondary);
+        }
+
+        /* FAQ Container */
+        .faq-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 211, 213, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative Elements */
+        .faq-container::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--secondary), transparent);
+            top: -150px;
+            right: -100px;
+            opacity: 0.3;
+            z-index: 0;
+        }
+
+        .faq-container::after {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--light), transparent);
+            bottom: -100px;
+            left: -80px;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        /* Header */
+        .faq-header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .faq-header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, var(--light), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .faq-header p {
+            font-size: 1.2rem;
+            color: var(--light);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        /* FAQ Items */
+        .faq-item {
+            background: rgba(84, 8, 99, 0.3);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 211, 213, 0.15);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .faq-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border-color: var(--secondary);
+        }
+
+        .faq-item.active {
+            background: rgba(146, 72, 122, 0.4);
+            box-shadow: 0 10px 30px rgba(146, 72, 122, 0.3);
+            border-color: var(--secondary);
+        }
+
+        /* Question */
+        .faq-question {
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .faq-question:hover {
+            background: rgba(146, 72, 122, 0.2);
+        }
+
+        .faq-question h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--light);
+            transition: color 0.3s;
+        }
+
+        .faq-item.active .faq-question h3 {
+            color: white;
+        }
+
+        .faq-icon {
+            font-size: 1.5rem;
+            color: var(--light);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+            color: white;
+        }
+
+        /* Answer */
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s cubic-bezier(0.215, 0.61, 0.355, 1);
+        }
+
+        .faq-answer-content {
+            padding: 0 30px 30px;
+            line-height: 1.7;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .faq-answer-content p {
+            margin-bottom: 15px;
+        }
+
+        .faq-answer-content ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .faq-answer-content li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 10px;
+        }
+
+        .faq-answer-content li::before {
+            content: "▸";
+            color: var(--secondary);
+            position: absolute;
+            left: -10px;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            background: var(--secondary);
+            color: var(--primary-dark);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+
+        .tech-badge:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer */
+        .faq-footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 211, 213, 0.2);
+            position: relative;
+            z-index: 1;
+            color: var(--light);
+            font-size: 0.95rem;
+        }
+
+        .faq-footer a {
+            color: var(--secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .faq-footer a:hover {
+            color: var(--light);
+            text-decoration: underline;
+        }
+
+        /* Stats */
+        .faq-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .faq-header h1 {
+                font-size: 2.8rem;
+            }
+
+            .faq-container {
+                padding: 25px;
+            }
+
+            .faq-question {
+                padding: 20px 25px;
+            }
+
+            .faq-question h3 {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                cursor: auto;
+            }
+
+            .cursor,
+            .cursor-follower {
+                display: none;
+            }
+
+            .faq-header h1 {
+                font-size: 2.4rem;
+            }
+
+            .faq-header p {
+                font-size: 1.1rem;
+            }
+
+            .faq-container {
+                padding: 20px;
+                margin: 20px auto;
+            }
+
+            .faq-question {
+                padding: 18px 20px;
+            }
+
+            .faq-question h3 {
+                font-size: 1.2rem;
+            }
+
+            .faq-answer-content {
+                padding: 0 20px 20px;
+                font-size: 1rem;
+            }
+
+            .faq-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .faq-header h1 {
+                font-size: 2rem;
+            }
+
+            .faq-header p {
+                font-size: 1rem;
+            }
+
+            .faq-question h3 {
+                font-size: 1.1rem;
+                margin-right: 15px;
+            }
+
+            .faq-icon {
+                font-size: 1.3rem;
+            }
+
+            .tech-badge {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+                margin-right: 6px;
+                margin-bottom: 6px;
+            }
+        }
+
+        /* Animation for answer content */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .faq-answer-content {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        /* Toggle All Button */
+        .toggle-all-btn {
+            display: block;
+            margin: 0 auto 30px;
+            padding: 12px 30px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(146, 72, 122, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .toggle-all-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(146, 72, 122, 0.4);
+        }
+
+        .toggle-all-btn:active {
+            transform: translateY(1px);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <div class="faq-container">
+        <div class="faq-header">
+            <h1> FAQs – Web Development  <i class="fas fa-question-circle"></i></h1>
+            <p>Explore commonly asked questions about web development. Click on any question to reveal the answer. All
+                sections are collapsible for easy navigation.</p>
+        </div>
+
+        <button class="toggle-all-btn" id="toggleAll">
+            <i class="fas fa-expand-alt"></i> Expand All Answers
+        </button>
+
+        <div class="faq-list">
+            <!-- FAQ Item 1 -->
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>What is Web Development and what does it involve?</h3>
+                    <div class="faq-icon">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>Web development is the process of building, creating, and maintaining websites. It
+                            encompasses several aspects including web design, web publishing, web programming, and
+                            database management.</p>
+                        <p>Web development is broadly classified into two categories:</p>
+                        <ul>
+                            <li><strong>Front-end Development:</strong> Also known as client-side development, it
+                                involves creating what users see and interact with in their browsers.</li>
+                            <li><strong>Back-end Development:</strong> Also known as server-side development, it
+                                involves the server, database, and application logic that work behind the scenes.</li>
+                        </ul>
+                        <p>Full-stack developers work on both front-end and back-end technologies to create complete web
+                            applications.</p>
+                        <div>
+                            <span class="tech-badge">HTML/CSS</span>
+                            <span class="tech-badge">JavaScript</span>
+                            <span class="tech-badge">React</span>
+                            <span class="tech-badge">Node.js</span>
+                            <span class="tech-badge">Databases</span>
+                            <span class="tech-badge">APIs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Item 2 -->
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>What's the difference between Front-end and Back-end development?</h3>
+                    <div class="faq-icon">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>Front-end and back-end development are two fundamental parts of web development that work
+                            together to create functional websites and applications.</p>
+                        <p><strong>Front-end Development (Client-side):</strong></p>
+                        <ul>
+                            <li>Focuses on the visual and interactive aspects of a website</li>
+                            <li>Uses HTML, CSS, and JavaScript</li>
+                            <li>Ensures responsive design for all devices</li>
+                            <li>Works with frameworks like React, Vue, and Angular</li>
+                            <li>Concerned with user experience (UX) and user interface (UI)</li>
+                        </ul>
+                        <p><strong>Back-end Development (Server-side):</strong></p>
+                        <ul>
+                            <li>Handles server, database, and application logic</li>
+                            <li>Uses languages like Python, PHP, Java, Ruby, and Node.js</li>
+                            <li>Manages data storage and retrieval</li>
+                            <li>Creates APIs for front-end communication</li>
+                            <li>Ensures security, performance, and scalability</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Item 3 -->
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>What are the essential skills for a modern web developer?</h3>
+                    <div class="faq-icon">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>Modern web development requires a diverse skill set that goes beyond just coding. Here are
+                            the essential skills:</p>
+                        <ul>
+                            <li><strong>Core Technologies:</strong> HTML5, CSS3, JavaScript (ES6+)</li>
+                            <li><strong>Front-end Frameworks:</strong> React, Angular, or Vue.js</li>
+                            <li><strong>Responsive Design:</strong> Media queries, flexbox, CSS grid</li>
+                            <li><strong>Version Control:</strong> Git and GitHub/GitLab</li>
+                            <li><strong>Back-end Basics:</strong> Node.js, Express, databases (SQL/NoSQL)</li>
+                            <li><strong>APIs:</strong> RESTful services, GraphQL</li>
+                            <li><strong>DevOps Fundamentals:</strong> Basic Linux, deployment, CI/CD</li>
+                            <li><strong>Soft Skills:</strong> Problem-solving, communication, teamwork</li>
+                        </ul>
+                        <p>Additionally, understanding web performance optimization, accessibility standards, and
+                            security best practices are crucial for building modern web applications.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Item 4 -->
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>How has web development evolved in recent years?</h3>
+                    <div class="faq-icon">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>Web development has undergone significant transformation in the past decade:</p>
+                        <ul>
+                            <li><strong>From Websites to Web Applications:</strong> Modern sites are interactive
+                                applications rather than static pages</li>
+                            <li><strong>JavaScript Everywhere:</strong> With Node.js, JavaScript now runs on both client
+                                and server</li>
+                            <li><strong>Component-Based Architecture:</strong> Frameworks like React and Vue promote
+                                reusable components</li>
+                            <li><strong>Mobile-First Approach:</strong> Responsive design is now standard rather than an
+                                afterthought</li>
+                            <li><strong>Performance Focus:</strong> Core Web Vitals and loading speed are critical
+                                ranking factors</li>
+                            <li><strong>Jamstack Architecture:</strong> Decoupling front-end from back-end for better
+                                performance</li>
+                            <li><strong>Serverless Computing:</strong> Cloud functions eliminate server management
+                                overhead</li>
+                            <li><strong>Progressive Web Apps (PWAs):</strong> Websites that feel like native mobile apps
+                            </li>
+                        </ul>
+                        <p>These changes have made web development more complex but also more powerful, enabling
+                            developers to create sophisticated applications that were previously only possible as
+                            desktop software.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Item 5 -->
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>What are the current trends in web development for 2025?</h3>
+                    <div class="faq-icon">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>Several exciting trends are shaping web development in 2025:</p>
+                        <ul>
+                            <li><strong>Artificial Intelligence Integration:</strong> AI-powered features, chatbots, and
+                                personalized experiences</li>
+                            <li><strong>Low-Code/No-Code Platforms:</strong> Tools that allow non-developers to create
+                                web applications</li>
+                            <li><strong>Web3 and Blockchain:</strong> Decentralized applications and smart contracts
+                            </li>
+                            <li><strong>Advanced JavaScript Frameworks:</strong> Next.js, SvelteKit, and Solid.js
+                                gaining popularity</li>
+                            <li><strong>Edge Computing:</strong> Processing data closer to users for faster performance
+                            </li>
+                            <li><strong>Motion UI:</strong> Sophisticated animations and micro-interactions</li>
+                            <li><strong>Voice Search Optimization:</strong> Adapting websites for voice-activated
+                                devices</li>
+                            <li><strong>Augmented Reality (AR) on Web:</strong> WebXR bringing AR experiences to
+                                browsers</li>
+                            <li><strong>Dark Mode Standardization:</strong> System-wide dark mode support</li>
+                            <li><strong>Accessibility-First Design:</strong> Building websites that work for everyone
+                                from the start</li>
+                        </ul>
+                        <p>Staying updated with these trends helps developers build modern, competitive web applications
+                            that meet user expectations.</p>
+                        <div>
+                            <span class="tech-badge">AI/ML</span>
+                            <span class="tech-badge">Web3</span>
+                            <span class="tech-badge">Next.js</span>
+                            <span class="tech-badge">Edge Computing</span>
+                            <span class="tech-badge">WebXR</span>
+                            <span class="tech-badge">Accessibility</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-footer">
+            <p>Designed & Developed by Paras Qureshi | Web
+                Development Resources</p>
+            <div class="faq-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalQuestions">5</span>
+                    <span class="stat-label">Questions</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="openQuestions">0</span>
+                    <span class="stat-label">Currently Open</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Responsive</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Custom Cursor Implementation
+        const cursor = document.querySelector('.cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
+
+        document.addEventListener('mousemove', (e) => {
+            // Main cursor
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+
+            // Follower cursor with delay
+            setTimeout(() => {
+                cursorFollower.style.left = e.clientX + 'px';
+                cursorFollower.style.top = e.clientY + 'px';
+            }, 100);
+        });
+
+        // Add hover effect to interactive elements
+        const interactiveElements = document.querySelectorAll(
+            '.faq-question, .toggle-all-btn, .tech-badge, a'
+        );
+
+        interactiveElements.forEach(element => {
+            element.addEventListener('mouseenter', () => {
+                cursor.classList.add('hover');
+            });
+
+            element.addEventListener('mouseleave', () => {
+                cursor.classList.remove('hover');
+            });
+        });
+
+        // FAQ Accordion Functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const faqItems = document.querySelectorAll('.faq-item');
+            const toggleAllBtn = document.getElementById('toggleAll');
+            const totalQuestions = document.getElementById('totalQuestions');
+            const openQuestions = document.getElementById('openQuestions');
+
+            // Set total questions count
+            totalQuestions.textContent = faqItems.length;
+
+            // Update open questions count
+            function updateOpenQuestions() {
+                const openCount = document.querySelectorAll('.faq-item.active').length;
+                openQuestions.textContent = openCount;
+            }
+
+            // Toggle FAQ item
+            function toggleFaqItem(item) {
+                const answer = item.querySelector('.faq-answer');
+
+                if (item.classList.contains('active')) {
+                    // Close the item
+                    answer.style.maxHeight = null;
+                    item.classList.remove('active');
+                } else {
+                    // Open the item
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                    item.classList.add('active');
+                }
+
+                updateOpenQuestions();
+            }
+
+            // Add click event to each FAQ question
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+
+                question.addEventListener('click', () => {
+                    toggleFaqItem(item);
+                });
+            });
+
+            // Toggle All Button Functionality
+            let allExpanded = false;
+
+            toggleAllBtn.addEventListener('click', () => {
+                if (allExpanded) {
+                    // Collapse all
+                    faqItems.forEach(item => {
+                        item.classList.remove('active');
+                        item.querySelector('.faq-answer').style.maxHeight = null;
+                    });
+                    toggleAllBtn.innerHTML = '<i class="fas fa-expand-alt"></i> Expand All Answers';
+                    toggleAllBtn.style.background = 'linear-gradient(90deg, var(--primary), var(--secondary))';
+                } else {
+                    // Expand all
+                    faqItems.forEach(item => {
+                        item.classList.add('active');
+                        const answer = item.querySelector('.faq-answer');
+                        answer.style.maxHeight = answer.scrollHeight + 'px';
+                    });
+                    toggleAllBtn.innerHTML = '<i class="fas fa-compress-alt"></i> Collapse All Answers';
+                    toggleAllBtn.style.background = 'linear-gradient(90deg, var(--secondary), var(--light))';
+                }
+
+                allExpanded = !allExpanded;
+                updateOpenQuestions();
+            });
+
+            // Auto-expand first FAQ item on page load
+            if (faqItems.length > 0) {
+                setTimeout(() => {
+                    toggleFaqItem(faqItems[0]);
+                }, 500);
+            }
+
+            // Add keyboard navigation support
+            document.addEventListener('keydown', (e) => {
+                const activeElement = document.activeElement;
+                const activeFaqIndex = Array.from(faqItems).findIndex(item =>
+                    item.contains(activeElement) || item.classList.contains('active')
+                );
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const nextIndex = (activeFaqIndex + 1) % faqItems.length;
+                    faqItems[nextIndex].querySelector('.faq-question').focus();
+                    toggleFaqItem(faqItems[nextIndex]);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prevIndex = (activeFaqIndex - 1 + faqItems.length) % faqItems.length;
+                    faqItems[prevIndex].querySelector('.faq-question').focus();
+                    toggleFaqItem(faqItems[prevIndex]);
+                } else if (e.key === ' ' || e.key === 'Enter') {
+                    if (activeElement.classList.contains('faq-question')) {
+                        e.preventDefault();
+                        const parentItem = activeElement.closest('.faq-item');
+                        toggleFaqItem(parentItem);
+                    }
+                }
+            });
+
+            // Make FAQ items focusable for accessibility
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                question.setAttribute('tabindex', '0');
+
+                // Add Enter key support for accessibility
+                question.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        toggleFaqItem(item);
+                    }
+                });
+            });
+
+            // Initial update of open questions count
+            updateOpenQuestions();
+        });
+
+        // Add smooth scroll for better UX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Add animation to tech badges on hover
+        document.querySelectorAll('.tech-badge').forEach(badge => {
+            badge.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-3px) scale(1.05)';
+            });
+
+            badge.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+
+</html>
