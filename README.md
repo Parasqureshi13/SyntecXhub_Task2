@@ -5,6 +5,7 @@ An interactive and animated FAQ web application developed as part of the **Synte
 This project demonstrates practical frontend development skills using **HTML, CSS, and Vanilla JavaScript**, with a strong focus on UI animations, interactivity, responsiveness, and accessibility.
 
 ---
+live demo link ()
 
 ## 🎯 Internship Objective
 
